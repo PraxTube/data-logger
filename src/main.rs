@@ -7,9 +7,7 @@ use std::io;
 
 use csv;
 
-use input::time_input;
-
-fn append_data(file: &str, data: &Vec<String>) -> Result<(), Box<dyn Error>> {
+fn append_data(file: &str, data: Vec<String>) -> Result<(), Box<dyn Error>> {
     let file = OpenOptions::new().create(true).append(true).open(file)?;
 
     let mut writer = csv::WriterBuilder::new().from_writer(io::BufWriter::new(file));
@@ -19,13 +17,14 @@ fn append_data(file: &str, data: &Vec<String>) -> Result<(), Box<dyn Error>> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let date = time_input()?;
-    println!("Date: {}", date);
-    let food_data = categories::category_food()?;
-    let mut data: Vec<String> = vec![date];
-    data.extend(food_data);
+    let category = input::category_input()?;
+    let category_data: Vec<String> = categories::get_data(&category)?;
+    let date: String = input::time_input()?;
 
-    append_data("data.csv", &data)?;
+    let mut data: Vec<String> = vec![date];
+    data.extend(category_data);
+
+    append_data("data.csv", data)?;
 
     Ok(())
 }

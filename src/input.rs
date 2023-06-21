@@ -65,3 +65,8 @@ pub fn time_input() -> Result<String, Box<dyn Error>> {
         .expect("Invalid range for minute.");
     Ok(date.to_string())
 }
+
+pub fn category_input() -> Result<String, Box<dyn Error>> {
+    let category: String = get_input("Which category to log?", None)?;
+    Ok(category)
+}
