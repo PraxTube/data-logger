@@ -38,6 +38,15 @@ pub fn get_data(category: &str) -> Result<Vec<String>, Box<dyn Error>> {
 pub fn log_food() -> Result<Vec<String>, Box<dyn Error>> {
     let mut data: Vec<String> = vec![];
     let amount: u32 = get_input("[1=Low, 2=Medium, 3=High]\nAmount eaten", None)?;
-    data.push(amount.to_string());
+    let speed: u32 = get_input("[1=Slow, 2=Medium, 3=Fast]\nEating speed", None)?;
+    let drink_afterwards: bool = get_input("Drink afterwards", Some(true))?;
+    let info: String = get_input("Food detail info", None)?;
+
+    data.extend(vec![
+        amount.to_string(),
+        speed.to_string(),
+        drink_afterwards.to_string(),
+        info,
+    ]);
     Ok(data)
 }
