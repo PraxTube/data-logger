@@ -14,7 +14,7 @@ fn data_dir() -> Result<PathBuf, Box<dyn Error>> {
         }
     };
 
-    let data_dir = home_dir.join(".config").join("data-logger").join("data");
+    let data_dir = home_dir.join(".config").join("dogg").join("data");
 
     if !data_dir.exists() {
         std::fs::create_dir_all(&data_dir)?;
