@@ -2,6 +2,17 @@
 name = "dogg"
 version = "0.1.0"
 edition = "2021"
+author = "PraxTube"
+description = "CLI tool that let's you log data manually."
+homepage = "https://github.com/PraxTube/dogg"
+documentation = "https://github.com/PraxTube/dogg"
+repository = "https://github.com/PraxTube/dogg"
+readme = "README.md"
+
+license = "MIT"
+
+keywords = ["data-logger", "log", "logger", "data"]
+categories = ["command-line-interface", "database"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
