@@ -25,7 +25,7 @@ fn data_dir() -> Result<PathBuf, Box<dyn Error>> {
 }
 
 pub fn add_data(category: &str, data: Vec<String>) -> Result<(), Box<dyn Error>> {
-    let data_file = data_dir()?.join(category);
+    let data_file = data_dir()?.join(format!("{}.csv", category));
     let file = OpenOptions::new()
         .create(true)
         .append(true)
@@ -37,8 +37,8 @@ pub fn add_data(category: &str, data: Vec<String>) -> Result<(), Box<dyn Error>>
     Ok(())
 }
 
-pub fn json_data(category: &str) -> Result<serde_json::Value, Box<dyn Error>> {
-    let path: PathBuf = data_dir()?.join(category);
+fn json_data() -> Result<serde_json::Value, Box<dyn Error>> {
+    let path: PathBuf = data_dir()?.join("config.json");
     let mut file = File::open(path)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
@@ -47,24 +47,19 @@ pub fn json_data(category: &str) -> Result<serde_json::Value, Box<dyn Error>> {
     Ok(json_data)
 }
 
-pub fn data_files() -> Result<Vec<String>, Box<dyn Error>> {
-    let mut files = Vec::new();
+pub fn category_json_data(category: &str) -> Result<serde_json::Value, Box<dyn Error>> {
+    let json_data = json_data()?;
+    let data = json_data[category].clone();
+    Ok(data)
+}
 
-    for entry in std::fs::read_dir(data_dir()?)? {
-        let entry = entry?;
-        let path = entry.path();
-
-        if !path.is_file() {
-            continue;
-        }
-
-        if let Some(file_name) = path.file_name() {
-            if let Some(file_name_str_csv) = file_name.to_str() {
-                if let Some(file_name_str) = file_name_str_csv.strip_suffix(".csv") {
-                    files.push(file_name_str.to_string());
-                }
-            }
-        }
-    }
-    Ok(files)
+pub fn data_keys() -> Result<Vec<String>, Box<dyn Error>> {
+    let json_data = json_data()?;
+    let keys: Vec<String> = json_data
+        .as_object()
+        .ok_or("Not a valid dict.")?
+        .keys()
+        .cloned()
+        .collect();
+    Ok(keys)
 }

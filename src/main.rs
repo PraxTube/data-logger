@@ -5,13 +5,13 @@ mod input;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let category = input::category_input()?;
-    let category_data: Vec<String> = categories::get_data(&category)?;
+    let raw_category = input::category_input()?;
+    let category: String = categories::category(&raw_category)?;
     let date: String = input::time_input()?;
 
     let mut data: Vec<String> = vec![date];
-    data.extend(category_data);
+    data.extend(categories::data_from_category(&category)?);
+    data::add_data(&category, data)?;
 
-    data::add_data("data.csv", data)?;
     Ok(())
 }
