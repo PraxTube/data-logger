@@ -1,8 +1,8 @@
 [package]
 name = "dogg"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
-author = "PraxTube"
+authors = ["PraxTube"]
 description = "CLI tool that let's you log data manually."
 homepage = "https://github.com/PraxTube/dogg"
 documentation = "https://github.com/PraxTube/dogg"

@@ -3,6 +3,7 @@ use std::fs::File;
 use std::fs::OpenOptions;
 use std::io;
 use std::io::Read;
+use std::io::Write;
 use std::path::PathBuf;
 
 use csv;
@@ -37,8 +38,13 @@ pub fn add_data(category: &str, data: Vec<String>) -> Result<(), Box<dyn Error>>
     Ok(())
 }
 
-fn json_data() -> Result<serde_json::Value, Box<dyn Error>> {
+fn config_path() -> Result<PathBuf, Box<dyn Error>> {
     let path: PathBuf = data_dir()?.join("config.json");
+    Ok(path)
+}
+
+fn json_data() -> Result<serde_json::Value, Box<dyn Error>> {
+    let path = config_path()?;
     let mut file = File::open(path)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
@@ -62,4 +68,29 @@ pub fn data_keys() -> Result<Vec<String>, Box<dyn Error>> {
         .cloned()
         .collect();
     Ok(keys)
+}
+
+pub fn create_default_config() -> Result<(), Box<dyn Error>> {
+    if config_path()?.exists() {
+        return Ok(());
+    }
+
+    let json_data = r#"
+    {
+        "dummy": {
+            "type": ["u32"],
+            "help": ["Your help message here"],
+            "value": ["123"]
+        }
+    }
+    "#;
+    let parsed_data: serde_json::Value = serde_json::from_str(json_data)?;
+
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(config_path()?)?;
+    let serialized = serde_json::to_string_pretty(&parsed_data)?;
+    file.write_all(serialized.as_bytes())?;
+    Ok(())
 }

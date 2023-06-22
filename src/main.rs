@@ -5,6 +5,8 @@ mod input;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
+    data::create_default_config()?;
+
     let mut sorted_keys = data::data_keys()?;
     sorted_keys.sort();
     let raw_category = input::category_input(sorted_keys)?;
