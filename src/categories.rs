@@ -1,8 +1,11 @@
 use std::collections::HashMap;
 use std::error::Error;
+use std::str::FromStr;
 
+use serde_json;
 use strsim::levenshtein;
 
+use crate::data;
 use crate::input::get_input;
 
 pub fn get_data(category: &str) -> Result<Vec<String>, Box<dyn Error>> {
@@ -33,6 +36,47 @@ pub fn get_data(category: &str) -> Result<Vec<String>, Box<dyn Error>> {
         }
         panic!("Couldn't find category {}!\nAborting...", category);
     }
+}
+
+fn data_from_file(category: &str) -> Result<Vec<String>, Box<dyn Error>> {
+    fn get_value<T: FromStr>(value_str: &str) -> Option<T>
+    where
+        T::Err: Error + 'static,
+    {
+        if value_str.to_lowercase() == "none" {
+            return None;
+        }
+
+        match value_str.parse::<T>() {
+            Ok(value) => Some(value),
+            Err(_) => None,
+        }
+    }
+    fn process_value(
+        type_str: &str,
+        help_msg: &str,
+        default_value: &str,
+    ) -> Result<String, Box<dyn Error>> {
+        let value: String = match type_str {
+            "u32" => get_input::<u32>(help_msg, get_value::<u32>(default_value))?.to_string(),
+            "i32" => get_input::<i32>(help_msg, get_value::<i32>(default_value))?.to_string(),
+            _ => String::from("Unknown type"),
+        };
+        Ok(value)
+    }
+
+    let json_data: serde_json::Value = data::json_data(category)?;
+
+    let data_types: Vec<String> = serde_json::from_value(json_data["type"].clone())?;
+    let help_msgs: Vec<String> = serde_json::from_value(json_data["help"].clone())?;
+    let default_values: Vec<String> = serde_json::from_value(json_data["value"].clone())?;
+
+    let mut data: Vec<String> = Vec::new();
+    for i in 0..data_types.len() {
+        let value = process_value(&data_types[i], &help_msgs[i], &default_values[i])?;
+        data.push(value);
+    }
+    Ok(data)
 }
 
 pub fn log_food() -> Result<Vec<String>, Box<dyn Error>> {
