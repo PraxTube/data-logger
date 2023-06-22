@@ -34,38 +34,41 @@ pub fn category(category: &str) -> Result<String, Box<dyn Error>> {
     }
 }
 
+fn get_value<T: FromStr>(value_str: &str) -> Option<T>
+where
+    T::Err: Error + 'static,
+{
+    if value_str.to_lowercase() == "none" {
+        return None;
+    }
+
+    match value_str.parse::<T>() {
+        Ok(value) => Some(value),
+        Err(_) => None,
+    }
+}
+
+fn process_value(
+    type_str: &str,
+    help_msg: &str,
+    default_value: &str,
+) -> Result<String, Box<dyn Error>> {
+    let value: String = match type_str {
+        "u32" => get_input::<u32>(help_msg, get_value::<u32>(default_value))?.to_string(),
+        "i32" => get_input::<i32>(help_msg, get_value::<i32>(default_value))?.to_string(),
+        "f32" => get_input::<f32>(help_msg, get_value::<f32>(default_value))?.to_string(),
+        "bool" => get_input::<bool>(help_msg, get_value::<bool>(default_value))?.to_string(),
+        "String" => get_input::<String>(help_msg, get_value::<String>(default_value))?.to_string(),
+        _ => "None".to_string(),
+    };
+
+    if value == "None" {
+        return Err(format!("Not a valid type: {}", type_str).into());
+    }
+    Ok(value)
+}
+
 pub fn data_from_category(category: &str) -> Result<Vec<String>, Box<dyn Error>> {
-    fn get_value<T: FromStr>(value_str: &str) -> Option<T>
-    where
-        T::Err: Error + 'static,
-    {
-        if value_str.to_lowercase() == "none" {
-            return None;
-        }
-
-        match value_str.parse::<T>() {
-            Ok(value) => Some(value),
-            Err(_) => None,
-        }
-    }
-    fn process_value(
-        type_str: &str,
-        help_msg: &str,
-        default_value: &str,
-    ) -> Result<String, Box<dyn Error>> {
-        let value: String = match type_str {
-            "u32" => get_input::<u32>(help_msg, get_value::<u32>(default_value))?.to_string(),
-            "i32" => get_input::<i32>(help_msg, get_value::<i32>(default_value))?.to_string(),
-            "f32" => get_input::<f32>(help_msg, get_value::<f32>(default_value))?.to_string(),
-            "bool" => get_input::<bool>(help_msg, get_value::<bool>(default_value))?.to_string(),
-            "String" => {
-                get_input::<String>(help_msg, get_value::<String>(default_value))?.to_string()
-            }
-            _ => String::from("Unknown type"),
-        };
-        Ok(value)
-    }
-
     let json_data: serde_json::Value = data::category_json_data(category)?;
 
     let data_types: Vec<String> = serde_json::from_value(json_data["type"].clone())?;

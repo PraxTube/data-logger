@@ -1,3 +1,4 @@
+use std::any::type_name;
 use std::error::Error;
 use std::io;
 use std::str::FromStr;
@@ -12,17 +13,8 @@ where
 {
     loop {
         match &default_value {
-            Some(value) => {
-                println!(
-                    "{} ({}, empty = {}): ",
-                    msg,
-                    std::any::type_name::<T>(),
-                    value
-                );
-            }
-            None => {
-                println!("{} ({}): ", msg, std::any::type_name::<T>(),);
-            }
+            Some(value) => println!("{} ({}, empty = {}): ", msg, type_name::<T>(), value),
+            None => println!("{} ({}): ", msg, std::any::type_name::<T>(),),
         }
         let mut line = String::new();
         io::stdin().read_line(&mut line)?;
@@ -66,7 +58,12 @@ pub fn time_input() -> Result<String, Box<dyn Error>> {
     Ok(date.to_string())
 }
 
-pub fn category_input() -> Result<String, Box<dyn Error>> {
+pub fn category_input(keys: Vec<String>) -> Result<String, Box<dyn Error>> {
+    println!("Log Keys:");
+    for key in keys {
+        print!("{}, ", key);
+    }
+    println!("\n");
     let category: String = get_input("Which category to log?", None)?;
     Ok(category)
 }
