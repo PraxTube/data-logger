@@ -34,6 +34,56 @@ pub fn category(category: &str) -> Result<String, Box<dyn Error>> {
     }
 }
 
+fn stylize_string(input_str: &str) -> String {
+    fn hex_to_asni_str(hex_str: &str) -> String {
+        if let Ok(color) = u32::from_str_radix(&hex_str.replace("#", ""), 16) {
+            let red = (color >> 16) & 0xFF;
+            let green = (color >> 8) & 0xFF;
+            let blue = color & 0xFF;
+
+            return format!("{};{};{}", red, green, blue);
+        }
+        "FORMAT ERROR".to_string()
+    }
+
+    let mut output_str: String = input_str
+        .replace("[bold]", "\x1b[1m")
+        .replace("[/bold]", "\x1b[22m")
+        .replace("[italic]", "\x1b[3m")
+        .replace("[/italic]", "\x1b[23m")
+        .replace("[underline]", "\x1b[4m")
+        .replace("[/underline]", "\x1b[24m")
+        .replace("[blink]", "\x1b[5m")
+        .replace("[/blink]", "\x1b[25m")
+        .replace("[invert]", "\x1b[7m")
+        .replace("[/invert]", "\x1b[27m")
+        .replace("[crossout]", "\x1b[9m")
+        .replace("[crossout]", "\x1b[29m")
+        .replace("[strike]", "\x1b[9m")
+        .replace("[/strike]", "\x1b[29m")
+        .replace("[/color]", "\x1b[39m");
+
+    let start_tag = "[color=";
+    let end_tag = "]";
+    let mut current_index = 0;
+
+    while let Some(start_index) = output_str[current_index..].find(start_tag) {
+        let adjusted_start_index = current_index + start_index + start_tag.len();
+
+        if let Some(end_index) = output_str[adjusted_start_index..].find(end_tag) {
+            let hex_str = &output_str[adjusted_start_index..(adjusted_start_index + end_index)];
+            output_str = output_str.replace(
+                &format!("{}{}{}", start_tag, hex_str, end_tag),
+                &format!("\x1b[38;2;{}m", hex_to_asni_str(hex_str)),
+            );
+            current_index = adjusted_start_index + end_index;
+        } else {
+            break;
+        }
+    }
+    output_str
+}
+
 fn get_value<T: FromStr>(value_str: &str) -> Option<T>
 where
     T::Err: Error + 'static,
@@ -53,6 +103,10 @@ fn process_value(
     help_msg: &str,
     default_value: &str,
 ) -> Result<String, Box<dyn Error>> {
+    let type_str: &str = &stylize_string(type_str);
+    let help_msg: &str = &stylize_string(help_msg);
+    let default_value: &str = &stylize_string(default_value);
+
     let value: String = match type_str {
         "u32" => get_input::<u32>(help_msg, get_value::<u32>(default_value))?.to_string(),
         "i32" => get_input::<i32>(help_msg, get_value::<i32>(default_value))?.to_string(),
