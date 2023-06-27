@@ -1,4 +1,5 @@
 mod category;
+mod custom_types;
 mod data;
 mod input;
 

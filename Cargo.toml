@@ -1,6 +1,6 @@
 [package]
 name = "dogg"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["PraxTube"]
 description = "CLI tool that let's you log data manually."
@@ -17,7 +17,6 @@ categories = ["command-line-interface", "database"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rustyline = "11.0.0"
 csv = "1.2.2"
 chrono = "0.4.26"
 strsim = "0.10.0"

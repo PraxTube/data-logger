@@ -4,6 +4,7 @@ use std::str::FromStr;
 use serde_json;
 use strsim::levenshtein;
 
+use crate::custom_types::Time;
 use crate::data;
 use crate::input::get_input;
 
@@ -113,11 +114,12 @@ fn process_value(
         "f32" => get_input::<f32>(help_msg, get_value::<f32>(default_value))?.to_string(),
         "bool" => get_input::<bool>(help_msg, get_value::<bool>(default_value))?.to_string(),
         "String" => get_input::<String>(help_msg, get_value::<String>(default_value))?.to_string(),
+        "Time" => get_input::<Time>(help_msg, get_value::<Time>(default_value))?.to_string(),
         _ => "None".to_string(),
     };
 
     if value == "None" {
-        return Err(format!("Not a valid type: {}", type_str).into());
+        return Err(format!("not a valid type: {}", type_str).into());
     }
     Ok(value)
 }
